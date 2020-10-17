@@ -1,3 +1,3 @@
-##Liga-Shell
+## Liga-Shell
 this is a toy shell and has fundamental features of tranditional shell like bash,zsh...
 ### a C practices
