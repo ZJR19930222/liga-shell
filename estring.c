@@ -1,6 +1,6 @@
 #include "liga.h"
 #include "estring.h"
-#define PROMPT ":->"
+extern char PROMPT[];
 int string_eq(char *obj1,char *obj2,int ch){
   char *c1=strchrnul(obj1,ch);
   char *c2=strchrnul(obj2,ch);
@@ -600,11 +600,11 @@ int condition(char *expr){
   }
   return 0;
 }
-char *getLine(FILE *fp,int interactive){
+char *getLine(FILE *fp){
   char *new;
   int ch,n=0,buf=0,flag=1,ss=-1;
-  if ( interactive )
-    printf(PROMPT);
+//  if ( PROMPT != NULL )
+    printf("%s",PROMPT);
   while((ch=getc(fp)) != EOF){
     if (n+1>=buf)
       new=malloc(BUF_BLOCK);

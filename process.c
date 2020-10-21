@@ -3,6 +3,7 @@
 #include "variable.h"
 #include "builtin.h"
 #include "process.h"
+#include <sys/mman.h>
 #define le ->content->l
 #define bf ->content->buf
 #define ls ->content->lstr
@@ -39,10 +40,13 @@ int do_process(process *p){
             break;
       }
       else{
-        if (do_cmd_line(p->cstr))
-          do_process(p->Then);
+        if (do_cmd_line(p->cstr)){
+          if (do_process(p->Then))
+            return 1;
+        }
         else{
-          do_process(p->Else);
+          if (do_process(p->Else))
+            return 1;
         }
       }
       return do_process(p->Next);
@@ -56,10 +60,11 @@ int liga(void){
   int on_process=0;
   signal(SIGINT,SIG_IGN);
   signal(SIGQUIT,SIG_IGN);
-  int tail,result=0,flag=1;
+  int tail,result=0;
   char *s;
   process *p=setProcess();
-  while ((s=getLine(stdin,flag))!=NULL){
+  work_path();
+  while ((s=getLine(stdin))!=NULL){
     if (*s==NL)
       continue;
     if (string_eq(s,"if",SPACE)){
@@ -160,7 +165,7 @@ int liga(void){
       }
     }
   }
-  puts("\rLiga-Shell exited!!");
+  puts("\rLiga-Shell exited------------------------------------------------");
   return 0;
 }
 void free_process(process *p){

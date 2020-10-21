@@ -136,6 +136,9 @@ char *substVar(char *a){
         case DIVIDE:
         case STAR:
         case VARSUB:
+        case '=':
+        case '>':
+        case '<':
         case NL:
           l=0;break;
         default:

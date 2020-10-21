@@ -95,5 +95,5 @@ char *operand(char *start,char *end);
 int condition(char *expr);// [不能落下]
 
 /*讀取一行內容，並去除頭尾的空格*/
-char *getLine(FILE *fp,int interactive);
+char *getLine(FILE *fp);
 #endif
