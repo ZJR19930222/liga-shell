@@ -31,8 +31,12 @@ char *nns_newstr(char *obj,int len){
     if (*(obj+i)==SPACE && dq==0){
       continue;
     }
+    else if (*(obj+i)==SLASHES && *(obj+i+1)==DQ){
+      i++;
+    }
     else if (*(obj+i)==DQ){
       dq=~dq;
+      continue;
     }
     new[n++]=*(obj+i);
   }
@@ -121,6 +125,7 @@ char *str_end_chr(char *expr,int ch){
 int strToNum(char *obj,int len){
   char *end=obj+len-1,*start=obj;
   int base=1,result=0,sign=1;
+  int tmp;
   if (*obj==SUBTR){
     start++;
     sign=-1;
@@ -128,7 +133,8 @@ int strToNum(char *obj,int len){
   if (*obj==PLUS)
     start++;
   for (;end>=start;end--){
-    result += base*((int)*end-48);
+    tmp=(int)*end-48;
+    result += base*(tmp<0 ? 0:tmp%10); /*prevent some error*/
     base *= 10;
   }
   return sign*result;
@@ -527,7 +533,16 @@ char *operand(char *a,char *b){
 int condition(char *expr){
   char *p;
   char *a,*b;
-  char *end=strchr(expr,RP);
+  char *end=strrchr(expr,RP);
+  char *isS=strchr(expr,'^');
+  if (isS != NULL){
+    a=newstr(expr+1,isS-expr-1);
+    b=newstr(isS+1,end-isS-1);
+    int result=stringIn(a,b);
+    free(a);
+    free(b);
+    return result;
+  }
   if ((p=strchr(expr,'<'))!=NULL && *(p+1)=='='){
     a=ns_newstr(expr+1,p-expr-1);
     b=operand(p+2,end-1);
@@ -604,7 +619,7 @@ char *getLine(FILE *fp){
   char *new;
   int ch,n=0,buf=0,flag=1,ss=-1;
 //  if ( PROMPT != NULL )
-    printf("%s",PROMPT);
+  printf("%s",PROMPT);
   while((ch=getc(fp)) != EOF){
     if (n+1>=buf)
       new=malloc(BUF_BLOCK);
@@ -636,36 +651,13 @@ char *head_ns_newstr(char *obj,int len){
   new[len-k]=NL;
   return new;
 }
-//int main(void){
-//  char *s="  \" jj l \"k kj jfdf";
-//  char *pString[]={"python","java","c++","c#","javascript","ruby",NULL};
-//  char **ps;
-//  ps=copy_list_str(pString);
-//  show_list_str(ps);
-//  printf("<%s>\n",newstr(s,strlen(s)));
-//  printf("<%s>\n",ns_newstr(s,strlen(s)));
-//  printf("<%s>\n",nns_newstr(s,strlen(s)));
-//  printf("<%s>\n",head_ns_newstr(s,strlen(s)));
-//  printf("<%s>\n",delspace(s));
-//  printf("<%d>\n",string_eq("kfc love","kfc",SPACE));
-//  printf("<%d>\n",string_eq("kfc","kf",SPACE));
-//  printf("<%d>\n",string_eq("kfc+ff","kfc+hh",PLUS));
-//  printf("<%d>\n",is_digit_str("-123",strlen("-123")));
-//  printf("<%d>\n",is_digit_str("- 123",strlen("- 123")));
-//  printf("<%d>\n",is_digit_str("-",strlen("-")));
-//  printf("<%d>\n",is_digit_str("5",strlen("5")));
-//  printf("<%d>\n",is_digit_str("",strlen("")));
-//  printf("<%d>\n",is_digit("+345"));
-//  printf("<%s>+<%s>=<%s>\n","java","script",comStr("java","script"));
-//  printf("<%s>+<%s>=<%s>\n","java","script",comStr_l("javakkkk","scriptffa",4,6));
-//  printf("<%d>\n",strToNum("+345",strlen("+345")));
-//  printf("<%d>\n",strToNum("-1180",strlen("-1180")));
-//  printf("<%d>\n",strToi("-1180"));
-//  freelist(ps);
-//  ps=splitLine(" java   script  \" liga beauty +\"  [ c plus ] hh  ");
-//  show_list_str(ps);
-//  char *st=" -- 33 + 22 - -11 ";
-//  char *end=st+strlen(st)-1;
-//  puts(operand(st,end));
-//  return 0;
-//}
+int stringIn(char *obj,char *patten){
+  char *new=expPatten(patten);
+  int result=1;
+  match_ptr *ptr=stringMatch_ptr(obj,new,1);
+  if (ptr==NULL)
+    result=0;
+  free(ptr);
+  free(new);
+  return result;
+}

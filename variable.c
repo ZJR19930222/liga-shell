@@ -139,6 +139,8 @@ char *substVar(char *a){
         case '=':
         case '>':
         case '<':
+        case '^':
+        case RP:
         case NL:
           l=0;break;
         default:
