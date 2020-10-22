@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 //typedef int (*func)(char*);
 enum _logic {AND,OR,ANY};
+extern int REP;
 void fatal(char *estr,int errnum);
 int unset(char *expr);
 int Export(char *expr);

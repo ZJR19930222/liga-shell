@@ -11,6 +11,7 @@
 #define FDBACK(x) (((x)==0)?1:0)
 #define FLAG_MM PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_SHARED,-1,0
 char PROMPT[2*PATH_MAX];
+int REP='#';
 typedef struct _path_tr {
   char *buf;
   size_t num_alloc;
@@ -188,6 +189,7 @@ int display(char *expr){
   showVar();
   return 1;
 }
+int replace(char *obj,char* patten);
 int cddir(char *expr){
   int restat;
   restat=chdir(expr);
