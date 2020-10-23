@@ -185,11 +185,52 @@ int value(char *expr){
   free(result);
   return 1;
 }
+int replace(char *expr){
+  /* "zjr=/s#obj#patten#n" */
+  /*REP=#*/
+  /*produce a variable for example: "zjr = "->"zjr"*/
+  match_ptr *qtr;
+  int n=1;
+  char *eq=strchr(expr,'=');
+  char *variable=ns_newstr(expr,eq-expr+1);//zjr=
+  char *rep1=strchr(expr,REP);
+  char *rep2=strchr(rep1+1,REP);
+  char *rep3=strchr(rep2+1,REP);
+  char *obj=newstr(rep1+1,rep2-rep1-1);
+  char *ptr=newstr(rep2+1,rep3-rep2-1);
+  char *patten=expPatten(ptr);
+  free(ptr);
+  rep3++;
+  if (*rep3!=NL){
+    /*"zjr=%s#obj#patten#"*/
+    n=strToNum(rep3,strlen(expr)-(rep3-expr));
+  }
+  if ((qtr=stringMatch_ptr(obj,patten,n))==NULL){
+    free(obj);
+    free(patten);
+    free(variable);
+    return 0;
+  }
+  char result[qtr->len+1+strlen(variable)];
+  memcpy(result,variable,strlen(variable));
+  memcpy(result+strlen(variable),qtr->str,qtr->len);
+  result[qtr->len+strlen(variable)]=NL;
+  putVar(result,0);
+  free(obj);
+  free(patten);
+  free(variable);
+  free(qtr);
+  return 1;
+}
+int setREP(char *expr){
+  char *p=strchrnul(expr,SPACE);
+  REP=*(p+1);
+  return 1;
+}
 int display(char *expr){
   showVar();
   return 1;
 }
-int replace(char *obj,char* patten);
 int cddir(char *expr){
   int restat;
   restat=chdir(expr);
@@ -252,14 +293,20 @@ int choice(char *expr){
       expr++;
     return cddir(expr);
   }
+  else if (string_eq(expr,"display",SPACE)){
+    return display(NULL);
+  }
+  else if (string_eq(expr,"REP",SPACE)){
+    return setREP(expr);
+  }
+  else if (isRegMatch(expr,expPatten("[a-z_][a-z_]+ *= *%s.*"))){
+    return replace(expr);
+  }
   else if (isRegMatch(expr,expPatten("[a-z_][a-z_]+ *=.*"))){
     return value(expr);
   }
   else if (isRegMatch(expr,"\\[.*]")){
     return condition(expr);
-  }
-  else if (string_eq(expr,"display",SPACE)){
-    return display(NULL);
   }
   else
     return -1;
@@ -363,11 +410,9 @@ int do_cmd_line(char *e){
   return status;
 }
 //int main(void){
-//  char *ss;
-//  if ((ss=work_path())!=NULL){
-//    printf("<%s>\n",ss);
-//    exit(0);
-//  }
-//    printf("<%s>\n",ss);
+//  char *s;
+//  while ((s=getLine(stdin))!=NULL)
+//  if (isRegMatch(s,expPatten("[a-z_][a-z_]+ *= *%s.*")))
+//    puts("ok");
 //  return 0;
 //}
