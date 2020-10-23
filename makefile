@@ -1,15 +1,20 @@
 ## build liga-shell
 hd=liga.h
-all:liga-shell
+clg=/usr/bin/clang
+ifeq (,$(wildcard $(clg)))
+    CC=gcc
+else
+    CC=clang
+endif
 liga-shell:liga-shell.c estring.o variable.o builtin.o process.o
-	clang liga-shell.c estring.o variable.o builtin.o process.o -o liga-shell
+	$(CC) liga-shell.c estring.o variable.o builtin.o process.o -o liga-shell
 process.o:$(hd) process.h process.c
-	clang -c process.c -o process.o
+	$(CC) -c process.c -o process.o
 builtin.o:$(hd) builtin.h builtin.c
-	clang -c builtin.c -o builtin.o
+	$(CC) -c builtin.c -o builtin.o
 variable.o:$(hd) variable.h variable.c
-	clang -c variable.c -o variable.o
+	$(CC) -c variable.c -o variable.o
 estring.o:$(hd) estring.h estring.c
-	clang -c estring.c -o estring.o
+	$(CC) -c estring.c -o estring.o
 clean:
 	rm -f *.o

@@ -186,13 +186,12 @@ int value(char *expr){
   return 1;
 }
 int replace(char *expr){
-  /* "zjr=/s#obj#patten#n" */
-  /*REP=#*/
-  /*produce a variable for example: "zjr = "->"zjr"*/
+  /* REP=#,"zjr=%s#obj#patten#n" */
   match_ptr *qtr;
   int n=1;
   char *eq=strchr(expr,'=');
-  char *variable=ns_newstr(expr,eq-expr+1);//zjr=
+  /*" liga  = ..." --> "liga=" */
+  char *variable=ns_newstr(expr,eq-expr+1);
   char *rep1=strchr(expr,REP);
   char *rep2=strchr(rep1+1,REP);
   char *rep3=strchr(rep2+1,REP);
@@ -202,7 +201,7 @@ int replace(char *expr){
   free(ptr);
   rep3++;
   if (*rep3!=NL){
-    /*"zjr=%s#obj#patten#"*/
+    /* "zjr=%s#obj#patten#" */
     n=strToNum(rep3,strlen(expr)-(rep3-expr));
   }
   if ((qtr=stringMatch_ptr(obj,patten,n))==NULL){
@@ -223,8 +222,8 @@ int replace(char *expr){
   return 1;
 }
 int setREP(char *expr){
-  char *p=strchrnul(expr,SPACE);
-  REP=*(p+1);
+  char *p=strchrnul(expr,SPACE)+1;
+  REP=*p;
   return 1;
 }
 int display(char *expr){
@@ -409,10 +408,3 @@ int do_cmd_line(char *e){
   }while(1);
   return status;
 }
-//int main(void){
-//  char *s;
-//  while ((s=getLine(stdin))!=NULL)
-//  if (isRegMatch(s,expPatten("[a-z_][a-z_]+ *= *%s.*")))
-//    puts("ok");
-//  return 0;
-//}
